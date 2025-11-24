@@ -1,0 +1,7 @@
+# Minimal requirements for the Brayton cycle script
+numpy>=1.21.0
+matplotlib>=3.4.0
+ipywidgets>=8.1.8
+
+# Optional for Real-gas
+#CoolProp>=6.4.1
