@@ -28,6 +28,7 @@ def RecoupIntercool_IG(PR:float, cyc:dict) -> tuple:
     # LPC
     #   Isentropic compression
     # We want both our compressor stages to have the same pressure ratio
+    # Logical, but also specified in assignment text
     PR_c1 = PR**0.5
     PR_c2 = PR_c1
     
@@ -38,7 +39,7 @@ def RecoupIntercool_IG(PR:float, cyc:dict) -> tuple:
     # Intercooler stage - Isobaric cooling
         # intercooler efficiency
             # Let us define the intercooler efficiency as how close to T02 we cool
-    etap_ic = 0.5 # Magic number (input parameter)
+    etap_ic = 1.0 # Ideal intercooler, specified in assignment text
 
     T04 = T02 + etap_ic * (T03 - T02) # Ideal intercooler cools back to T02
 
