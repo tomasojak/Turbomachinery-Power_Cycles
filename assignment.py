@@ -1,3 +1,5 @@
+from tarfile import OutsideDestinationError
+from turtle import color
 import numpy as np
 R_gas = 287.0  # J/kgK
 
@@ -7,7 +9,8 @@ def RecoupIntercool_IG(PR:float, cyc:dict) -> tuple:
     # Brayton cycle with intercooling + recuperation
     #########
     
-#     PR    = cyc['PR'].value       # pressure ratio
+    # Note: The implementation should not know this is a jupyter slider...
+    # PR    = cyc['PR'].value       # pressure ratio
     TR    = cyc['TR'].value       # temperature ratio (tmax/tmin)
     gam_c = cyc['gam_c'].value    # specific heat capacity ratio for compressor 
     gam_t = cyc['gam_t'].value    # specific heat capacity ratio for turbine 
@@ -72,11 +75,11 @@ def RecoupIntercool_IG(PR:float, cyc:dict) -> tuple:
     specw = (w_t-(w_c1+w_c2))/(cp_c*T02) # non-dimensional specific work of the cycle    
 
     # Entropy and temperature
-    ds_3 = cp_c*np.log(T03/T02) - R_gas*np.log(PR_c1) # compression 1
-    ds_4 = cp_c*np.log(T04/T03) # intercooling
-    ds_5 = cp_c*np.log(T05/T04) - R_gas*np.log(PR_c2) # compression 2
-    ds_6 = cp_t*np.log(T06/T05) # combustion
-    ds_7 = cp_t*np.log(T07/T06) + R_gas*np.log(PR_t) # expansion
+    ds_3 = cp_c*np.log(T03/T02) - R_gas*np.log(PR_c1)   # compression 1
+    ds_4 = cp_c*np.log(T04/T03)                         # intercooling
+    ds_5 = cp_c*np.log(T05/T04) - R_gas*np.log(PR_c2)   # compression 2
+    ds_6 = cp_t*np.log(T06/T05)                         # combustion
+    ds_7 = cp_t*np.log(T07/T06) + R_gas*np.log(PR_t)    # expansion
     
     s_2 = 0
     s_3 = ds_3
@@ -96,12 +99,13 @@ def RecoupIntercool_IG(PR:float, cyc:dict) -> tuple:
 
 # fake a slider input
 class property:
+    value = None
     def __init__(self, value):
         self.value = value
 
 if __name__ == "__main__":
     # Example usage
-    cyc = {
+    cycle = {
         'PR': property(32.0),
         'TR': property(6.0),
         'gam_c': property(1.4),
@@ -111,7 +115,7 @@ if __name__ == "__main__":
         'PR_cc': property(1)
     }
     
-    specw, eta, entr, temp = RecoupIntercool_IG(cyc['PR'].value, cyc)
+    specw, eta, entr, temp = RecoupIntercool_IG(cycle['PR'].value, cycle)
     print(f"Specific Work: {specw}, Efficiency: {eta}")
     print(f"Entropy states: {entr}")
     print(f"Temperature states: {temp}")
@@ -124,11 +128,37 @@ if __name__ == "__main__":
     plt.figure(figsize=(6,5))
     plt.semilogy(S, T, '-o', color='tab:blue')  # log-scale for temperature (y-axis)
     for i,(si,ti) in enumerate(zip(S,T)):
-         plt.text(si, ti, f'  {i+2}', va='bottom', fontsize=9)  # label points 2..8
+        plt.text(si, ti, f'  {i+2}', va='bottom', fontsize=9)  # label points 2..8
     plt.xlabel('Entropy (J/kg/K)')
     plt.ylabel('Temperature (K) [log scale]')
     plt.title('T-s diagram: Recoup + Intercool Brayton (ideal gas)')
     plt.grid(True, which='both', ls='--')
     plt.gca().invert_xaxis() if False else None  # keep default orientation
     plt.tight_layout()
+    plt.show()
+
+    # Plotting various curves to show sensitivity to changes:
+    minValue = 16
+    maxValue = 50
+    nValues = 50
+    targetX = 'PR'
+
+    Xvalues = np.linspace(minValue, maxValue, nValues)
+    specw = np.zeros(nValues)
+    eta = np.zeros(nValues)
+
+    for iVal in range(nValues):
+        cycle[targetX].value = Xvalues[iVal]
+        specw[iVal], eta[iVal], _, _ = RecoupIntercool_IG(cycle['PR'].value, cycle)
+
+    fig, ax1 = plt.subplots()
+    ax2 = ax1.twinx()
+    ax1.plot(Xvalues, specw, 'g-')
+    ax2.plot(Xvalues, eta, 'b-')
+    ax1.set_ylabel('specw', color  ='g')
+    ax2.set_ylabel('eta', color = 'b')
+    ax1.set_xlabel(targetX)
+
+    plt.grid(True, which='both', ls='--')
+
     plt.show()
