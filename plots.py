@@ -313,7 +313,7 @@ if __name__ == "__main__":
         plotFunc(etaWorkLoci, "eta_work_loci")
     ]
 
-    savePlots = True
+    savePlots = False
     saveDir = "./figures/"
 
     for plot in plots:
