@@ -1,13 +1,23 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 from brayton import Brayton_IG
 from IntercooledRecoup import RecoupIntercool_IG
+
+defaultFontSize = 12
+
 
 # fake a slider input
 class property:
     value = None
     def __init__(self, value):
         self.value = value
+
+class plotFunc:
+    def __init__(self, func:callable, name:str):
+        self.func = func
+        self.name = name
 
 # Because Python passes references, we need to reset the cycle dict each time we call this function
 def resetCycle(cycle:dict, defaultCycle:dict) -> None:
@@ -29,100 +39,36 @@ def valueRangeCycle(cycle:dict, cycleFunction:callable, targetX:str, Xvalues:lis
         resetCycle(cycle, defaultCycle)
     return specw, eta
 
-if __name__ == "__main__":
-    # Example usage
-    defaultCycle = {
-        'PR': property(32.0),
-        'TR': property(6.0),
-        'gam_c': property(1.4),
-        'gam_t': property(1.4),
-        'etap_c': property(1),
-        'etap_t': property(1),
-        'PR_cc': property(1)
-    }
-    cycle = {}
-    for key in defaultCycle:
-        cycle[key] = property(defaultCycle[key].value)
+def plotCycle():
+        _, _, entrRecoup, tempRecoup = RecoupIntercool_IG(cycle['PR'].value, cycle)
+        _, _, entrBrayton, tempBrayton = Brayton_IG(cycle['PR'].value, cycle)
+
+        S_recoup = np.array(entrRecoup)
+        T_recoup = np.array(tempRecoup)
+
+        S_brayton = np.array(entrBrayton)
+        T_brayton = np.array(tempBrayton)
+
+        fig, ax = plt.subplots(figsize=(6,5))
+        ax.semilogy(S_brayton, T_brayton, '-o', color='tab:blue', label='Brayton')  # log-scale for temperature (y-axis)
+        ax.semilogy(S_recoup, T_recoup, '-o', color='tab:orange', label='Recoup + Intercool')  # log-scale for temperature (y-axis) 
+        # for i,(si,ti) in enumerate(zip(S_brayton[:-1], T_brayton[:-1])):  # skip last point
+        #     ax.text(si, ti, f'  {i+2}', va='bottom', fontsize=9)  # label points 2..(n-1)
+        for i,(si,ti) in enumerate(zip(S_recoup[:-1], T_recoup[:-1])):  # skip last point
+                ax.text(si, ti, f'  {i+2}', va='bottom', fontsize=9)  # label points 2..(m-1)
+
+        ax.set_xlabel('Entropy (J/kg/K)')
+        ax.set_ylabel('Temperature (K) [log scale]')
+        
+        ax.set_title('T-s diagram: Brayton vs Recoup + Intercool (ideal gas)')
+        ax.grid(True, which='both', ls='--')
+        ax.legend()
+
+        plt.tight_layout()
+
+
+def cycleComp():
     
-    specw, eta, entr, temp = RecoupIntercool_IG(cycle['PR'].value, cycle)
-    print(f"Specific Work: {specw}, Efficiency: {eta}")
-    print(f"Entropy states: {entr}")
-    print(f"Temperature states: {temp}")
-
-    # Plot T-s diagram
-    import matplotlib.pyplot as plt
-    S = np.array(entr)
-    T = np.array(temp)
-
-    # plt.figure(figsize=(6,5))
-    # plt.semilogy(S, T, '-o', color='tab:tab:blue')  # log-scale for temperature (y-axis)
-    # for i,(si,ti) in enumerate(zip(S,T)):
-    #     plt.text(si, ti, f'  {i+2}', va='bottom', fontsize=9)  # label points 2..8
-    # plt.xlabel('Entropy (J/kg/K)')
-    # plt.ylabel('Temperature (K) [log scale]')
-    # plt.title('T-s diagram: Recoup + Intercool Brayton (ideal gas)')
-    # plt.grid(True, which='both', ls='--')
-    # plt.gca().invert_xaxis() if False else None  # keep default orientation
-    # plt.tight_layout()
-
-
-
-    # fig, ax1 = plt.subplots()
-    # ax2 = ax1.twinx()
-    # ax1.plot(Xvalues, specw, 'g-')
-    # ax2.plot(Xvalues, eta, 'b-')
-    # ax1.set_ylabel('specw', color  ='g')
-    # ax2.set_ylabel('eta', color = 'b')
-    # ax1.set_xlabel(targetX)
-
-    # plt.grid(True, which='both', ls='--')
-
-    ##### PLOTTING #####
-
-    fontSize = 10
-
-    plt.rcParams.update({
-    "font.family": "sans-serif",
-    "font.size": fontSize,
-    "axes.labelsize": fontSize,
-    "axes.titlesize": fontSize,
-    "legend.fontsize": fontSize,
-    "xtick.labelsize": fontSize,
-    "ytick.labelsize": fontSize,
-    })
-
-    # region ########### Plot cycle T-s ###########
-
-    _, _, entrRecoup, tempRecoup = RecoupIntercool_IG(cycle['PR'].value, cycle)
-    _, _, entrBrayton, tempBrayton = Brayton_IG(cycle['PR'].value, cycle)
-
-    S_recoup = np.array(entrRecoup)
-    T_recoup = np.array(tempRecoup)
-
-    S_brayton = np.array(entrBrayton)
-    T_brayton = np.array(tempBrayton)
-
-    fig, ax = plt.subplots(figsize=(6,5))
-    ax.semilogy(S_brayton, T_brayton, '-o', color='tab:blue', label='Brayton')  # log-scale for temperature (y-axis)
-    ax.semilogy(S_recoup, T_recoup, '-o', color='tab:orange', label='Recoup + Intercool')  # log-scale for temperature (y-axis) 
-    # for i,(si,ti) in enumerate(zip(S_brayton[:-1], T_brayton[:-1])):  # skip last point
-    #     ax.text(si, ti, f'  {i+2}', va='bottom', fontsize=9)  # label points 2..(n-1)
-    for i,(si,ti) in enumerate(zip(S_recoup[:-1], T_recoup[:-1])):  # skip last point
-        ax.text(si, ti, f'  {i+2}', va='bottom', fontsize=9)  # label points 2..(m-1)
-
-    ax.set_xlabel('Entropy (J/kg/K)')
-    ax.set_ylabel('Temperature (K) [log scale]')
-    
-    ax.set_title('T-s diagram: Brayton vs Recoup + Intercool (ideal gas)')
-    ax.grid(True, which='both', ls='--')
-    ax.legend()
-
-    plt.tight_layout()
-    
-    # endregion
-
-    # region ########### Plot 1: the two cycles compared ###########
-
     Xvalues = np.linspace(1, 40, 50)
     
     specwBraytonIG, etaBraytonIG = valueRangeCycle(cycle, Brayton_IG, 'PR', Xvalues)
@@ -172,10 +118,9 @@ if __name__ == "__main__":
             loc="lower right", frameon=True, framealpha=1)
     
     resetCycle(cycle, defaultCycle)
-    # endregion
 
-    # region ########### Plot 2: efficiencies vs performance ###########
-
+def effiPerfPlot():
+    
     Xvalues = np.linspace(0.4, 1.0, 50)
 
     specwRecoupICIG_c, etaRecoupICIG_c = valueRangeCycle(cycle, RecoupIntercool_IG, 'etap_c', Xvalues)
@@ -216,10 +161,7 @@ if __name__ == "__main__":
     ax1.legend(lines1 + lines2, labels1 + labels2,
             loc="lower right", frameon=True, framealpha=1)
 
-    # endregion
-
-    # region ########### Cycles and efficiencies ###########
-
+def cyclesEffies():
     Xvalues = np.linspace(0.65, 1.0, 50)
 
     _, etaRecoupICIG_c = valueRangeCycle(cycle, RecoupIntercool_IG, 'etap_c', Xvalues)
@@ -239,10 +181,8 @@ if __name__ == "__main__":
     ax1.legend(loc="lower right", frameon=True, framealpha=1)
 
     resetCycle(cycle, defaultCycle)
-    # endregion
 
-    # region ########### PR and TR vs performance ###########
-
+def prTrPerfPlot():
     # PR: Pressure ratio sweep
     PRSweep = np.linspace(1, 40, 100)
     specwRecoupPR, etaRecoupPR = valueRangeCycle(cycle, RecoupIntercool_IG, 'PR', PRSweep)
@@ -290,6 +230,99 @@ if __name__ == "__main__":
     lines2, labels2 = ax2b.get_legend_handles_labels()
     ax2.legend(lines1 + lines2, labels1 + labels2, loc="lower right", frameon=True, framealpha=1)
 
-    # endregion
+def etaWorkLoci():
+     
+    PRRange = np.linspace(1, 40, 10)
+    TRRange = np.linspace(3, 6, 4)
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    colors = ['tab:blue', 'tab:green', 'tab:orange', 'tab:red'] # abandnedoned
+
+    for TR in TRRange:
+        for PR in PRRange:
+            resetCycle(cycle, defaultCycle)
+            cycle['PR'].value = PR
+            cycle['TR'].value = TR
+            specw, eta, _, _ = RecoupIntercool_IG(cycle['PR'].value, cycle)
+            ax.plot(specw, eta, 'o', color='black', markersize=4) # B&W version
+            # ax.plot(specw, eta, 'o', color=colors[list(TRRange).index(TR)], markersize=4) # colored version
+        # Ugly way to align
+        if TR != TRRange[-1]:
+            ax.text(specw + 0.15, eta, f'TR={TR:.1f}', fontsize=defaultFontSize)
+        else:
+            ax.text(specw - 0.1, eta - 0.05, f'TR={TR:.1f}', fontsize=defaultFontSize)
+
+    ax.annotate('', xy=(1.05, 0.55), xytext=(0.65, 0.5),
+                arrowprops=dict(arrowstyle='->', alpha=0.4, color='k'))
+    text1 = ax.text(0.8, 0.495, 'Increasing TR', fontsize=defaultFontSize, backgroundcolor = 'white')
+
+    ax.annotate('', xy=(1.3, 0.56), xytext=(1.1, 0.66),
+                arrowprops=dict(arrowstyle='->', alpha=0.4, color='k'))
+    text1 = ax.text(1.1, 0.65, 'Increasing PR', fontsize=defaultFontSize, backgroundcolor = 'white')
+    ax.set_xlabel("Specific work (J/kg)")
+    ax.set_ylabel("Efficiency (-)")
+
+    ax.grid(True, which='both', linestyle='--', linewidth=0.6, alpha=0.5)
+
+
+##### MAIN #####
+
+if __name__ == "__main__":
+    # Example usage
+    defaultCycle = {
+        'PR': property(32.0),
+        'TR': property(6.0),
+        'gam_c': property(1.4),
+        'gam_t': property(1.4),
+        'etap_c': property(1),
+        'etap_t': property(1),
+        'PR_cc': property(1)
+    }
+    cycle = {}
+    for key in defaultCycle:
+        cycle[key] = property(defaultCycle[key].value)
+    
+    specw, eta, entr, temp = RecoupIntercool_IG(cycle['PR'].value, cycle)
+    print(f"Specific Work: {specw}, Efficiency: {eta}")
+    print(f"Entropy states: {entr}")
+    print(f"Temperature states: {temp}")
+
+    # Plot T-s diagram
+    S = np.array(entr)
+    T = np.array(temp)
+
+    ##### PLOTTING #####
+
+    plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.size": defaultFontSize,
+    "axes.labelsize": defaultFontSize,
+    "axes.titlesize": defaultFontSize,
+    "legend.fontsize": defaultFontSize,
+    "xtick.labelsize": defaultFontSize,
+    "ytick.labelsize": defaultFontSize,
+    })
+
+    plots = [
+        plotFunc(plotCycle, "cycle_T-s_diagram"),
+        plotFunc(cycleComp, "the_two_cycles_compared"),
+        plotFunc(effiPerfPlot, "efficiencies_vs_performance"),
+        plotFunc(cyclesEffies, "cycles_and_efficiencies"),
+        plotFunc(prTrPerfPlot, "PR_and_TR_vs_performance"),
+        plotFunc(etaWorkLoci, "eta_work_loci")
+    ]
+
+    savePlots = True
+    saveDir = "./figures/"
+
+    for plot in plots:
+        plot.func()
+        fig = plt.gcf()
+        if savePlots:
+            savepath = f"{saveDir}{plot.name}.pdf"
+            plt.savefig(savepath, format='pdf', bbox_inches='tight')
+            plt.close(fig)
+            print(f"Saved plot {plot.name} to {savepath}")
 
     plt.show()
