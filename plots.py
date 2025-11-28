@@ -250,8 +250,8 @@ def etaWorkLoci():
         # Ugly way to align
         if TR != TRRange[-1]:
             ax.text(specw + 0.15, eta, f'TR={TR:.1f}', fontsize=defaultFontSize)
-        else:
-            ax.text(specw - 0.1, eta - 0.05, f'TR={TR:.1f}', fontsize=defaultFontSize)
+        else: # last TR
+            ax.text(specw - 0.15, eta - 0.03, f'TR={TR:.1f}', fontsize=defaultFontSize)
 
     ax.annotate('', xy=(1.05, 0.55), xytext=(0.65, 0.5),
                 arrowprops=dict(arrowstyle='->', alpha=0.4, color='k'))
