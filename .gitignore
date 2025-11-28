@@ -1,0 +1,32 @@
+# Ignore the figures folder and everything under it
+/figures/
+
+# Common Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual envs
+venv/
+env/
+.venv/
+ENV/
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Editor / OS
+.vscode/
+*.log
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Test / cache
+.pytest_cache/
+
+# Ignore generated PDFs everywhere (optional)
+*.pdf
