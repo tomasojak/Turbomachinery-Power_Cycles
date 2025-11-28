@@ -3,8 +3,6 @@ For now, and probably forever, all code will be in the jupyter notebook. This is
 
 Our assignment is on **Intercooled recuperated** Brayton cycle.
 
-Document to slap down some brain sotrm: [[insert link]]
-
 ---
 
 To use this repository:
