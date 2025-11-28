@@ -272,7 +272,7 @@ if __name__ == "__main__":
     # Example usage
     defaultCycle = {
         'PR': property(32.0),
-        'TR': property(6.0),
+        'TR': property(5.0),
         'gam_c': property(1.4),
         'gam_t': property(1.4),
         'etap_c': property(1),
@@ -306,7 +306,7 @@ if __name__ == "__main__":
 
     plots = [
         plotFunc(plotCycle, "cycle_T-s_diagram"),
-        plotFunc(cycleComp, "the_two_cycles_compared"),
+        plotFunc(cycleComp, "Pressure_ratio_cycle_comparison"),
         plotFunc(effiPerfPlot, "efficiencies_vs_performance"),
         plotFunc(cyclesEffies, "cycles_and_efficiencies"),
         plotFunc(prTrPerfPlot, "PR_and_TR_vs_performance"),
