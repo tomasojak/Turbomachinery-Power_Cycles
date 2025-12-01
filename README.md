@@ -5,15 +5,8 @@ Our assignment is on **Intercooled recuperated** Brayton cycle.
 
 ---
 
-To use this repository:
-Probably easiest to use a [git client](https://github.com/apps/desktop), should come with a git installation as well
+All of the assignment is an an external python file named `IntercooledRecoup.py`.
+The logic for plotting (and caing the plots) is in a standalone file.
+The Brayton cycle has been moved to a separate file for external plotting capabilities.
 
-1) Download [git](https://git-scm.com/install/mac) (seems to be a headache on Mac)
-2) In target folder run (should likely work)
-```sh
-git init
-git clone https://github.com/tomasojak/Turbomachinery-Power_Cycles.git
-```
-3) use git as nromal
-
-Or we can always use something else to share the code if this would waste too much time.
+The notebook is linked to the external files to retain functionality.
