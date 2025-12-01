@@ -15,14 +15,11 @@ def RecoupIntercool_IG(PR:float, cyc:dict) -> tuple:
     etap_c = cyc['etap_c'].value  # polytropic eff for compressor
     etap_t = cyc['etap_t'].value  # polytropic eff for turbine
     PR_cc  = cyc['PR_cc'].value   # combustion chamber pressure ratio
-
-    # TODO: Experiment with intercooler and recuperator efficiency values
     
     # Inputs, gam_c = gamma_air, gam_t = gamma_flg
     T02 = 293.15
     cp_c = R_gas*gam_c/(gam_c-1)
     cp_t = R_gas*gam_t/(gam_t-1)
-
 
     #------------------------------
 
@@ -38,7 +35,7 @@ def RecoupIntercool_IG(PR:float, cyc:dict) -> tuple:
     
     # Intercooler stage - Isobaric cooling
         # intercooler efficiency
-            # Let us define the intercooler efficiency as how close to T02 we cool
+        # Let us define the intercooler efficiency as how close to T02 we cool
     etap_ic = 1 # Ideal intercooler, specified in assignment text
 
     T04 = T03 - etap_ic*(T03 - T02)
